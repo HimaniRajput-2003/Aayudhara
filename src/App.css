@@ -36,3 +36,17 @@
     transform: rotate(360deg);
   }
 }
+.blood{
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
+}
+.Next{
+ background-color: cadetblue;
+  width: 20%;
+ border-radius: 50%;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+}
