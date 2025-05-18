@@ -19,17 +19,7 @@ function Home() {
 
         
       </header>
-      <main>
-        <h2>Features</h2>
-        <ul>
-          <li>Feature 1</li>
-          <li>Feature 2</li>
-          <li>Feature 3</li>
-        </ul>
-      </main>
-      <footer>
-        <p>&copy; 2025 Ayuudhara. All rights reserved.</p>
-      </footer>
+      
 
          
     </div>
