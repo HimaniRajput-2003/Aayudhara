@@ -1,3 +1,4 @@
+// Register.js
 import React, { useState } from 'react';
 import './Register.css';
 
@@ -5,122 +6,178 @@ const Register = () => {
   const [formData, setFormData] = useState({
     fullname: '',
     email: '',
-    password: '',
-    confirmPassword: '',
+    phone: '',
+    city: '',
+    address: '',
     gender: '',
     bloodGroup: '',
-    dob: '',
-    phone: '',
+    age: ''
   });
+
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailOTP, setEmailOTP] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'email') {
+      setEmailVerified(false);
+      setOtpSent(false);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const checkDuplicate = async () => {
+    const res = await fetch(`http://localhost:5000/api/donor/search`);
+    const donors = await res.json();
+    return donors.some(
+      d => d.email === formData.email || d.phone === formData.phone
+    );
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
+    if (!emailVerified) return alert("Please verify your email first.");
+    if (isNaN(formData.age) || +formData.age < 18) {
+      return alert('Age must be 18 or older.');
+    }
+    if (!/^[0-9]{10}$/.test(formData.phone)) {
+      return alert('Phone must be exactly 10 digits.');
     }
 
-    console.log("Form submitted:", formData);
-    alert("Registration successful!");
-    // You can send formData to a backend API here.
+    const isDuplicate = await checkDuplicate();
+    if (isDuplicate) return alert('Email or phone already exists.');
+
+    const res = await fetch('http://localhost:5000/api/donor/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    if (res.ok) {
+      alert('Request submitted successfully!');
+    } else {
+      alert('Failed to submit request.');
+    }
+  };
+
+  const sendEmailOTP = async () => {
+    if (!formData.email) return alert('Please enter your email first');
+
+    try {
+      const res = await fetch('http://localhost:5000/api/otp/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setOtpSent(true);
+        alert('OTP sent to your email.');
+      } else {
+        alert('Failed to send OTP');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error sending OTP');
+    }
+  };
+
+  const verifyEmailOTP = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/otp/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp: emailOTP })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setEmailVerified(true);
+        setOtpSent(false);
+        alert('Email verified successfully');
+      } else {
+        alert('Invalid OTP');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error verifying OTP');
+    }
   };
 
   return (
     <div className="form-container">
-      <h2>Register</h2>
+      <h2>Request Donation</h2>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="fullname">Full Name</label>
-        <input
-          type="text"
-          id="fullname"
-          name="fullname"
-          value={formData.fullname}
-          onChange={handleChange}
-          required
-        />
+        <label>Full Name</label>
+        <input type="text" name="fullname" value={formData.fullname} onChange={handleChange} required />
 
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <label htmlFor="phone">Phone Number</label>
-        <input
-            type="tel"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-            />
-       
+        <label>Email</label>
+        <input type="email" name="email" value={formData.email} onChange={handleChange} required />
 
-        <label>Gender</label>
-        <div className="gender-group">
-          <label><input type="radio" name="gender" value="male" onChange={handleChange} required /> Male</label>
-          <label><input type="radio" name="gender" value="female" onChange={handleChange} required /> Female</label>
-          <label><input type="radio" name="gender" value="other" onChange={handleChange} required /> Other</label>
+        <div className="verify-btn-wrapper">
+          {!emailVerified && !otpSent && (
+            <button type="button" className="verify-button" onClick={sendEmailOTP}>Verify</button>
+          )}
+          {emailVerified && <span style={{ color: 'green', marginLeft: '10px' }}>✅</span>}
         </div>
 
-        <label htmlFor="bloodGroup">Blood Group</label>
-        <select
-          id="bloodGroup"
-          name="bloodGroup"
-          value={formData.bloodGroup}
+        {otpSent && !emailVerified && (
+          <div className="otp-entry">
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={emailOTP}
+              onChange={(e) => setEmailOTP(e.target.value)}
+            />
+            <button type="button" onClick={verifyEmailOTP}>Verify OTP</button>
+            <button type="button" onClick={sendEmailOTP} style={{ backgroundColor: '#ffc107', marginTop: '8px' }}>
+              Resend OTP
+            </button>
+          </div>
+        )}
+
+        <label>Phone Number</label>
+        <input
+          type="tel"
+          name="phone"
+          value={formData.phone}
           onChange={handleChange}
           required
-        >
-          <option value="">--Select Blood Group--</option>
-          <option value="A+">A+</option>
-          <option value="A-">A-</option>
-          <option value="B+">B+</option>
-          <option value="B-">B-</option>
-          <option value="O+">O+</option>
-          <option value="O-">O-</option>
-          <option value="AB+">AB+</option>
-          <option value="AB-">AB-</option>
+          maxLength={10}
+          placeholder="10-digit phone"
+        />
+
+        <label>City</label>
+        <input type="text" name="city" value={formData.city} onChange={handleChange} required />
+
+        <label>Address</label>
+        <textarea name="address" value={formData.address} onChange={handleChange} required />
+
+        <div className="gender-wrapper">
+          <label>Gender</label>
+          <div className="gender-group">
+            <label><input type="radio" name="gender" value="male" onChange={handleChange} required /> Male</label>
+            <label><input type="radio" name="gender" value="female" onChange={handleChange} required /> Female</label>
+            <label><input type="radio" name="gender" value="other" onChange={handleChange} required /> Other</label>
+          </div>
+        </div>
+
+        <label>Blood Group</label>
+        <select name="bloodGroup" value={formData.bloodGroup} onChange={handleChange} required>
+          <option value="">Select</option>
+          <option value="A+">A+</option><option value="A-">A-</option>
+          <option value="B+">B+</option><option value="B-">B-</option>
+          <option value="O+">O+</option><option value="O-">O-</option>
+          <option value="AB+">AB+</option><option value="AB-">AB-</option>
         </select>
 
-        <label htmlFor="dob">Date of Birth</label>
-        <input
-          type="date"
-          id="dob"
-          name="dob"
-          value={formData.dob}
-          onChange={handleChange}
-          required
-        />
-         <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-        />
+        <label>Age</label>
+        <input type="number" name="age" value={formData.age} onChange={handleChange} required min="18" />
 
-        <label htmlFor="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          id="confirmPassword"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          required
-        />
-
-        <button type="submit">Register</button>
+        <button type="submit" className="submit-button">Request Donation</button>
       </form>
     </div>
   );
