@@ -23,7 +23,7 @@
     "dev": "nodemon server.js",
     "client": "react-scripts start",
     "build": "react-scripts build",
-    "heroku-postbuild": "npm run build"
+    "render-postbuild": "npm run build"
   },
   "eslintConfig": {
     "extends": [
