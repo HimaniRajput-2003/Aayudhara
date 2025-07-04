@@ -14,6 +14,6 @@ const donorSchema = new mongoose.Schema({
 
 // 👉 make sure the unique indexes are built in MongoDB
 donorSchema.index({ email: 1  }, { unique: true });
-donorSchema.index({ phone: 1  }, { unique: true });
+
 
 module.exports = mongoose.model('Donor', donorSchema);

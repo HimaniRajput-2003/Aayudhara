@@ -4,29 +4,33 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 
-dotenv.config();
+// ✅ Load environment variables
+
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+console.log("✅ Loaded MONGO_URI:", process.env.MONGO_URI);
+
+const fs = require('fs');
+console.log("✅ .env file exists:", fs.existsSync('.env'));
+console.log("✅ Loaded MONGO_URI:", process.env.MONGO_URI);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Import routes
+// ✅ API routes
 const donorRoutes = require('./routes/donorRoutes');
 const otpRoutes = require('./routes/otp');
-
-// Register routes
 app.use('/api/donor', donorRoutes);
 app.use('/api/otp', otpRoutes);
 
-// Serve React frontend from /build
+// ✅ Serve React build
 app.use(express.static(path.join(__dirname, '../build')));
-
-// React Router fallback (for client-side routing)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
 
-// Connect to MongoDB and start the server
+// ✅ MongoDB connection
+console.log("MONGO_URI:", process.env.MONGO_URI); // Add this for debug
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     app.listen(process.env.PORT || 5000, () => {
