@@ -15,7 +15,7 @@ const DonorSearch = () => {
     }
 
     try {
-      const url = `http://localhost:5000/api/donor/search?city=${encodeURIComponent(city)}&bloodGroup=${encodeURIComponent(bloodGroup)}`;
+      const url = `https://aayudhara-5.onrender.com/api/donor/search?city=${encodeURIComponent(city)}&bloodGroup=${encodeURIComponent(bloodGroup)}`;
       console.log('🔍 Fetching:', url);
       const res = await fetch(url);
       const data = await res.json();

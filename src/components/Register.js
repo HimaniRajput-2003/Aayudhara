@@ -28,7 +28,7 @@ const Register = () => {
   };
 
   const checkDuplicate = async () => {
-    const res = await fetch(`http://localhost:5000/api/donor/search`);
+    const res = await fetch(`https://aayudhara-5.onrender.com/api/donor/search`);
     const donors = await res.json();
     return donors.some(
       d => d.email === formData.email || d.phone === formData.phone
@@ -49,7 +49,7 @@ const Register = () => {
     const isDuplicate = await checkDuplicate();
     if (isDuplicate) return alert('Email or phone already exists.');
 
-    const res = await fetch('http://localhost:5000/api/donor/register', {
+    const res = await fetch('https://aayudhara-5.onrender.com/api/donor/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData)
@@ -66,7 +66,7 @@ const Register = () => {
     if (!formData.email) return alert('Please enter your email first');
 
     try {
-      const res = await fetch('http://localhost:5000/api/otp/send-otp', {
+      const res = await fetch('https://aayudhara-5.onrender.com/api/otp/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email })
@@ -87,7 +87,7 @@ const Register = () => {
 
   const verifyEmailOTP = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/otp/verify-otp', {
+      const res = await fetch('https://aayudhara-5.onrender.com/api/otp/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp: emailOTP })
