@@ -109,7 +109,7 @@ const Register = () => {
 
   return (
     <div className="form-container">
-      <h2>Request Donation</h2>
+      <h2>Become a Donor</h2>
       <form onSubmit={handleSubmit}>
         <label>Full Name</label>
         <input type="text" name="fullname" value={formData.fullname} onChange={handleChange} required />
@@ -177,7 +177,7 @@ const Register = () => {
         <label>Age</label>
         <input type="number" name="age" value={formData.age} onChange={handleChange} required min="18" />
 
-        <button type="submit" className="submit-button">Request Donation</button>
+        <button type="submit" className="submit-button">Become a Donor</button>
       </form>
     </div>
   );
